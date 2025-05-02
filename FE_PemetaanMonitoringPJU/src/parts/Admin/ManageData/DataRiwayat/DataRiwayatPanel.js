@@ -1,58 +1,98 @@
 /* eslint-disable */
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Button,
-  Tag,
-  notification,
-  Modal,
-  Form,
-  Input,
-  DatePicker,
-  TimePicker,
-  Select,
-} from "antd";
-import axios from "axios";
-import { useParams } from "react-router-dom";
-import { EditOutlined, DeleteOutlined, PlusOutlined, ExportOutlined } from "@ant-design/icons";
-import dayjs from "dayjs";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
+import L from 'leaflet';
+import axios from 'axios';
+import 'leaflet/dist/leaflet.css';
+import { Table, Tag, Collapse } from 'antd';
+import { CaretRightOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
-const DataRiwayatPanel = () => {
-  const { id } = useParams();
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [modalType, setModalType] = useState("");
-  const [selectedData, setSelectedData] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [noApp, setnoApp] = useState("");
-  const [isInfoModalVisible, setIsInfoModalVisible] = useState(true);
-  const [form] = Form.useForm();
+const { Panel } = Collapse;
 
+// Warna kecamatan
+const kecamatanColors = {
+  balerejo: "red",
+  dagangan: "blue",
+  dolopo: "green",
+  geger: "orange",
+  gemarang: "purple",
+  jiwan: "cyan",
+  kare: "pink",
+  kebonsari: "yellow",
+  madiun: "brown",
+  mejayan: "lime",
+  pilangkenceng: "teal",
+  saradan: "navy",
+  sawahan: "magenta",
+  wonoasri: "olive",
+  wungu: "gray",
+  default: "black",
+};
+
+const PemetaanPanelPage = () => {
+  const [panelData, setPanelData] = useState([]);
+  const [geoJsonData, setGeoJsonData] = useState([]);
+  const [mapCenter, setMapCenter] = useState([-7.5625922, 111.5778515]);
+  const [mapZoom, setMapZoom] = useState(12);
+  const [isLoading, setIsLoading] = useState(true);
+  const [riwayatData, setRiwayatData] = useState({});
+  const [loadingRiwayat, setLoadingRiwayat] = useState({});
+  const [expandedPopup, setExpandedPopup] = useState(null);
+
+  const navigate = useNavigate();
   const authToken = localStorage.getItem("authToken");
 
+  const statusColors = {
+    Pending: "#FF4500",
+    Proses: "#FFD700",
+    Selesai: "#4CAF50",
+  };
+
   useEffect(() => {
-    if (id) {
-      fetchRiwayatPanel(id);
-    }
-  }, [id]);
+    setIsLoading(true);
+
+    const fetchGeoJsonAndPanelData = async () => {
+      try {
+        // Fetch semua GeoJSON dari folder public
+        const kecamatanNames = Object.keys(kecamatanColors).filter((name) => name !== "default");
+
+        const geoJsonPromises = kecamatanNames.map((kecamatan) =>
+          fetch(`/geojson/${kecamatan}.geojson`)
+            .then((response) => {
+              if (!response.ok) {
+                console.error(`Failed to load ${kecamatan}.geojson`);
+                return null;
+              }
+              return response.json();
+            })
+            .then((data) => (data ? { kecamatan, data } : null))
+        );
+
+        const geoJsonResults = await Promise.all(geoJsonPromises);
+        const validGeoJson = geoJsonResults.filter((item) => item !== null);
+        setGeoJsonData(validGeoJson);
+
+        // Fetch panel data dari API dengan authorization
+        const headers = { Authorization: `Bearer ${authToken}` };
+        const panelResponse = await axios.get('http://localhost:8000/api/panels-with-status', { headers });
+        setPanelData(panelResponse.data || []);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGeoJsonAndPanelData();
+  }, [authToken]);
 
   const fetchRiwayatPanel = async (panelId) => {
-    setIsLoading(true);
+    setLoadingRiwayat(prev => ({ ...prev, [panelId]: true }));
     try {
-      const response = await axios.get(
-        `http://localhost:8000/api/riwayat-panel/${panelId}`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        }
-      );
-
-      const { no_app = "" } = response.data; 
-      setnoApp(no_app); 
-
-      if (no_app) setIsInfoModalVisible(true);
+      const headers = { Authorization: `Bearer ${authToken}` };
+      const response = await axios.get(`http://localhost:8000/api/riwayat-panel/${panelId}`, { headers });
 
       const { riwayat_panels = [], pengaduan_details = [] } = response.data;
 
@@ -79,177 +119,41 @@ const DataRiwayatPanel = () => {
       }));
 
       const combinedData = [...riwayatData, ...pengaduanData];
-      setData(combinedData);
+      setRiwayatData(prev => ({ ...prev, [panelId]: combinedData }));
     } catch (error) {
       console.error("Error fetching Riwayat panel:", error);
-      notification.error({ message: "Gagal memuat data Riwayat panel" });
+      setRiwayatData(prev => ({ ...prev, [panelId]: [] }));
     } finally {
-      setIsLoading(false);
+      setLoadingRiwayat(prev => ({ ...prev, [panelId]: false }));
     }
   };
 
-  const handleDelete = async (idRiwayat) => {
-    Modal.confirm({
-      title: "Hapus Riwayat panel",
-      content: "Apakah Anda yakin ingin menghapus riwayat ini?",
-      okText: "Ya",
-      cancelText: "Batal",
-      onOk: async () => {
-        try {
-          await axios.delete(
-            `http://localhost:8000/api/riwayat-panel/${idRiwayat}`,
-            {
-              headers: { Authorization: `Bearer ${authToken}` },
-            }
-          );
-          notification.success({ message: "Riwayat panel berhasil dihapus" });
-          fetchRiwayatPanel(id);
-        } catch (error) {
-          console.error("Error deleting Riwayat panel:", error);
-          notification.error({ message: "Gagal menghapus data" });
-        }
-      },
+  const styleFeature = (kecamatanName) => {
+    const color = kecamatanColors[kecamatanName.toLowerCase()] || kecamatanColors.default;
+    return {
+      color: color,
+      weight: 2,
+      fillColor: color,
+      fillOpacity: 0.5,
+    };
+  };
+
+  const getCustomMarkerIcon = (status) => {
+    const color = statusColors[status] || "#808080";
+    const svgIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="60" viewBox="0 0 24 36">
+        <path d="M12 0C7 0 3 4 3 9c0 6.5 9 18 9 18s9-11.5 9-18c0-5-4-9-9-9z" fill="${color}" stroke="#333" stroke-width="1"/>
+        <circle cx="12" cy="9" r="5" fill="#FFF" stroke="#333" stroke-width="1"/>
+      </svg>
+    `;
+    return new L.DivIcon({
+      className: 'custom-marker-icon',
+      html: svgIcon,
+      iconSize: [40, 60],
+      iconAnchor: [20, 60],
+      popupAnchor: [0, -60],
     });
   };
-
-  const handleOpenModal = (type, record = null) => {
-    setModalType(type);
-    setSelectedData(record);
-    form.resetFields();
-    if (record) {
-      form.setFieldsValue({
-        lokasi: record.lokasi || "",
-        tanggal_masalah: record.tanggal_masalah ? dayjs(record.tanggal_masalah) : null,
-        jam_masalah: record.jam_masalah ? dayjs(record.jam_masalah, "HH:mm") : null,
-        tanggal_penyelesaian: record.tanggal_penyelesaian
-          ? dayjs(record.tanggal_penyelesaian)
-          : null,
-        jam_penyelesaian: record.jam_penyelesaian ? dayjs(record.jam_penyelesaian, "HH:mm") : null,
-        keterangan_masalah: record.keterangan_masalah || "",
-        uraian_masalah: record.uraian_masalah || "",
-        durasi_penyelesaian: record.durasi_penyelesaian || "",
-        penyelesaian_masalah: record.penyelesaian_masalah || "",
-        pencegahan: record.pencegahan || "",
-        nomor_rujukan: record.nomor_rujukan || "",
-        status: record.status || "",
-      });
-    }
-    setShowModal(true);
-  };
-
-  const handleExport = async () => {
-    setIsExporting(true);
-    try {
-        const response = await axios.get(`http://localhost:8000/api/export-riwayat-panel/riwayat/${id}`, {
-            headers: { Authorization: `Bearer ${authToken}` },
-            responseType: 'blob',
-        });
-
-        const blob = new Blob([response.data], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        });
-
-        // Tentukan nama file berdasarkan noApp
-        const filename = `Riwayat Panel No APP ${noApp || "Unknown"}.xlsx`;
-
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        notification.success({ message: 'Data berhasil diekspor!' });
-    } catch (error) {
-        const errorMsg = error.response?.data?.message || 'Terjadi kesalahan saat mengekspor data.';
-        notification.error({ message: 'Gagal mengekspor data!', description: errorMsg });
-    } finally {
-        setIsExporting(false);
-    }
-  };
-
-  const handleFormValuesChange = (_, allValues) => {
-    const { tanggal_masalah, jam_masalah, tanggal_penyelesaian, jam_penyelesaian } = allValues;
-  
-    // Hitung durasi otomatis jika data lengkap
-    const duration = calculateDurationInHoursAndMinutes(
-      tanggal_masalah,
-      jam_masalah,
-      tanggal_penyelesaian,
-      jam_penyelesaian
-    );
-  
-    if (duration) {
-      form.setFieldsValue({ durasi_penyelesaian: duration });
-    }
-  };
-  
-  const calculateDurationInHoursAndMinutes = (startDate, startTime, endDate, endTime) => {
-    if (startDate && startTime && endDate && endTime) {
-      const start = dayjs(`${startDate.format("YYYY-MM-DD")} ${startTime.format("HH:mm:ss")}`);
-      const end = dayjs(`${endDate.format("YYYY-MM-DD")} ${endTime.format("HH:mm:ss")}`);
-  
-      const diffInMinutes = end.diff(start, "minutes");
-      const hours = Math.floor(diffInMinutes / 60);
-      const minutes = diffInMinutes % 60;
-  
-      return `${hours} jam, ${minutes} menit`;
-    }
-    return null;
-  };
-  
-  const handleModalSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-  
-      const payload = {
-        ...values,
-        panel_id: id,
-        tanggal_masalah: values.tanggal_masalah
-          ? values.tanggal_masalah.format("YYYY-MM-DD")
-          : null,
-        jam_masalah: values.jam_masalah
-          ? values.jam_masalah.format("HH:mm:ss")
-          : null,
-        tanggal_penyelesaian: values.tanggal_penyelesaian
-          ? values.tanggal_penyelesaian.format("YYYY-MM-DD")
-          : null,
-        jam_penyelesaian: values.jam_penyelesaian
-          ? values.jam_penyelesaian.format("HH:mm:ss")
-          : null,
-      };
-  
-      if (modalType === "create") {
-        await axios.post(`http://localhost:8000/api/riwayat-panel`, payload, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        notification.success({ message: "Riwayat Panel berhasil ditambahkan" });
-      } else {
-        await axios.put(
-          `http://localhost:8000/api/riwayat-panel/${selectedData.id_riwayat_panel}`,
-          payload,
-          { headers: { Authorization: `Bearer ${authToken}` } }
-        );
-        notification.success({ message: "Riwayat Panel berhasil diperbarui" });
-      }
-  
-      fetchRiwayatPanel(id);
-      setShowModal(false);
-    } catch (error) {
-      // Tangani error dari Backend
-      if (error.response && error.response.status === 400) {
-          // Error validasi dari Backend
-          notification.warning({
-              message: error.response.data.message || "Terjadi kesalahan saat memvalidasi data.",
-              // description: error.response.data.message || "Terjadi kesalahan saat memvalidasi data.",
-          });
-      } else {
-          // Error lainnya
-          console.error("Error submitting form:", error);
-          notification.error({ message: "Gagal menyimpan data Riwayat APJ" });
-      }
-    }
-  };  
 
   const columns = [
     {
@@ -268,203 +172,224 @@ const DataRiwayatPanel = () => {
       render: (date) => (date ? dayjs(date).format("DD MMMM YYYY") : "-"),
     },
     {
-      title: "Jam Masalah",
-      dataIndex: "jam_masalah",
-      render: (time) => (time ? time : "-"),
-    },
-    {
-      title: "Keterangan Masalah",
-      dataIndex: "keterangan_masalah",
-      render: (text) => (text ? text : "-"),
-    },
-    {
-      title: "Uraian Masalah",
-      dataIndex: "uraian_masalah",
-      render: (text) => (text ? text : "-"),
-    },
-    {
-      title: "Tanggal Penyelesaian",
-      dataIndex: "tanggal_penyelesaian",
-      render: (date) => (date ? dayjs(date).format("DD MMMM YYYY") : "-"),
-    },
-    {
-      title: "Jam Penyelesaian",
-      dataIndex: "jam_penyelesaian",
-      render: (time) => (time ? time : "-"),
-    },
-    {
-      title: "Durasi Penyelesaian (Menit)",
-      dataIndex: "durasi_penyelesaian",
-      render: (duration) => (duration ? duration : "-"),
-    },
-    {
-      title: "Penyelesaian Masalah",
-      dataIndex: "penyelesaian_masalah",
-      render: (text) => (text ? text : "-"),
-    },
-    {
-      title: "Pencegahan",
-      dataIndex: "pencegahan",
-      render: (text) => (text ? text : "-"),
-    },
-    {
-      title: "Nomor Rujukan",
-      dataIndex: "nomor_rujukan",
-      render: (text) => (text ? text : "-"),
-    },
-    {
       title: "Status",
       dataIndex: "status",
       render: (status) => {
-        if (!status) {
-          return <Tag color="default">-</Tag>;
-        }
+        if (!status) return <Tag color="default">-</Tag>;
         let color;
         switch (status) {
-          case "Pending":
-            color = "gold";
-            break;
-          case "Proses":
-            color = "blue";
-            break;
-          case "Selesai":
-            color = "green";
-            break;
-          default:
-            color = "default";
+          case "Pending": color = "gold"; break;
+          case "Proses": color = "blue"; break;
+          case "Selesai": color = "green"; break;
+          default: color = "default";
         }
         return <Tag color={color}>{status}</Tag>;
       },
     },
     {
-      title: "Sumber Data",
+      title: "Sumber",
       dataIndex: "source",
       render: (text) => <Tag>{text}</Tag>,
     },
-    {
-      title: "Aksi",
-      key: "aksi",
-      render: (_, record) =>
-        record.source === "Riwayat" ? (
-          <div style={{ display: "flex", gap: "8px" }}>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => handleOpenModal("edit", record)}
-            >
-              Edit
-            </Button>
-            <Button
-              icon={<DeleteOutlined />}
-              danger
-              onClick={() => handleDelete(record.id_riwayat_panel)}
-            >
-              Hapus
-            </Button>
-          </div>
-        ) : null,
-    },
   ];
 
-  return (
-    <div className="container">
-      {/* Search and Create (Fixed Position) */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '10px',
-          marginBottom: '16px',
-        }}
-      >
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => handleOpenModal("create")}
-        >
-          Tambah Riwayat
-        </Button>
-        <Button type="default" icon={<ExportOutlined />} loading={isExporting} onClick={handleExport}>
-          {isExporting ? 'Sedang Mengekspor...' : 'Export'}
-        </Button>
+  const expandedRowRender = (record) => {
+    return (
+      <div style={{ margin: 0, padding: 0 }}>
+        <p><strong>Jam Masalah:</strong> {record.jam_masalah || "-"}</p>
+        <p><strong>Keterangan Masalah:</strong> {record.keterangan_masalah || "-"}</p>
+        <p><strong>Uraian Masalah:</strong> {record.uraian_masalah || "-"}</p>
+        <p><strong>Tanggal Penyelesaian:</strong> {record.tanggal_penyelesaian ? dayjs(record.tanggal_penyelesaian).format("DD MMMM YYYY") : "-"}</p>
+        <p><strong>Jam Penyelesaian:</strong> {record.jam_penyelesaian || "-"}</p>
+        <p><strong>Durasi Penyelesaian:</strong> {record.durasi_penyelesaian || "-"}</p>
+        <p><strong>Penyelesaian Masalah:</strong> {record.penyelesaian_masalah || "-"}</p>
+        <p><strong>Pencegahan:</strong> {record.pencegahan || "-"}</p>
+        <p><strong>Nomor Rujukan:</strong> {record.nomor_rujukan || "-"}</p>
       </div>
-      <Table
-        columns={columns}
-        dataSource={data.map((item) => ({ ...item, key: item.id_riwayat_panel }))}
-        loading={isLoading}
-        pagination={{
-          current: currentPage,
-          pageSize: itemsPerPage,
-          total: data.length,
-          onChange: (page) => setCurrentPage(page),
+    );
+  };
+
+  const toggleRiwayat = (panelId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (expandedPopup === panelId) {
+      setExpandedPopup(null);
+    } else {
+      setExpandedPopup(panelId);
+      if (!riwayatData[panelId]) {
+        fetchRiwayatPanel(panelId);
+      }
+    }
+  };
+
+  return (
+    <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
+      <button
+        onClick={() => navigate('/app/admin/dashboard')}
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '20px',
+          padding: '10px 20px',
+          backgroundColor: '#4CAF50',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontSize: '16px',
+          zIndex: 1000,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         }}
-        scroll={{ x: "max-content" }}
-      />
-      <Modal
-          title="Informasi"
-          visible={isInfoModalVisible}
-          onOk={() => setIsInfoModalVisible(false)}
-          onCancel={() => setIsInfoModalVisible(false)}
-          okText="Oke"
-          cancelButtonProps={{ style: { display: "none" } }}
-        >
-          <p>Data Riwayat Panel No APP {noApp || "Unknown"}</p>
-        </Modal>
-      <Modal
-        title={modalType === "create" ? "Tambah Riwayat panel" : "Edit Riwayat panel"}
-        visible={showModal}
-        onCancel={() => setShowModal(false)}
-        onOk={() => form.submit()}
       >
-        <Form form={form} layout="vertical" onFinish={handleModalSubmit} onValuesChange={handleFormValuesChange}>
-          <Form.Item name="lokasi" label="Lokasi" rules={[{ required: true, message: "Lokasi wajib diisi" }]}>
-            <Input placeholder="Masukkan Lokasi" />
-          </Form.Item>
-          <Form.Item name="tanggal_masalah" label="Tanggal Masalah">
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item name="jam_masalah" label="Jam Masalah">
-            <TimePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item name="keterangan_masalah" label="Keterangan Masalah">
-            <Input.TextArea placeholder="Masukkan Keterangan Masalah" />
-          </Form.Item>
-          <Form.Item name="uraian_masalah" label="Uraian Masalah">
-            <Input.TextArea placeholder="Masukkan Uraian Masalah" />
-          </Form.Item>
-          <Form.Item name="tanggal_penyelesaian" label="Tanggal Penyelesaian">
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item name="jam_penyelesaian" label="Jam Penyelesaian">
-            <TimePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item name="durasi_penyelesaian" label="Durasi Penyelesaian (Jam, Menit)">
-            <Input
-              disabled
-              placeholder="Durasi otomatis berdasarkan waktu masalah dan penyelesaian"
-            />
-          </Form.Item>
-          <Form.Item name="penyelesaian_masalah" label="Penyelesaian Masalah">
-            <Input.TextArea placeholder="Masukkan Penyelesaian Masalah" />
-          </Form.Item>
-          <Form.Item name="pencegahan" label="Pencegahan">
-            <Input.TextArea placeholder="Masukkan Pencegahan" />
-          </Form.Item>
-          <Form.Item name="nomor_rujukan" label="Nomor Rujukan">
-            <Input placeholder="Masukkan Nomor Rujukan" />
-          </Form.Item>
-          <Form.Item name="status" label="Status" rules={[{ required: true, message: "Status wajib diisi" }]}>
-            <Select placeholder="Pilih Status">
-              <Select.Option value="Pending">Pending</Select.Option>
-              <Select.Option value="Proses">Proses</Select.Option>
-              <Select.Option value="Selesai">Selesai</Select.Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
+        Back to Dashboard
+      </button>
+
+      {isLoading && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 500,
+            color: 'white',
+            fontSize: '20px',
+            fontWeight: 'bold',
+          }}
+        >
+          Loading data, please wait...
+        </div>
+      )}
+
+      <MapContainer 
+        center={mapCenter} 
+        zoom={mapZoom} 
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {geoJsonData.map(({ kecamatan, data }) => (
+          <GeoJSON
+            key={kecamatan}
+            data={data}
+            style={() => styleFeature(kecamatan)}
+            onEachFeature={(feature, layer) => {
+              if (feature.properties) {
+                layer.bindPopup(`
+                  <div>
+                    <strong>Kecamatan:</strong> ${feature.properties.district || 'Tidak diketahui'}
+                    <br />
+                    <strong>Desa:</strong> ${feature.properties.village || 'Tidak diketahui'}
+                  </div>
+                `);
+              }
+            }}
+          />
+        ))}
+        {panelData.filter(panel => panel.latitude && panel.longitude).map((panel) => (
+          <Marker
+            key={panel.id_panel}
+            position={[panel.latitude, panel.longitude]}
+            icon={getCustomMarkerIcon(panel.status || "Default")}
+            eventHandlers={{
+              click: (e) => {
+                e.originalEvent.preventDefault();
+                e.originalEvent.stopPropagation();
+              }
+            }}
+          >
+            <Popup>
+              <div 
+                style={{ 
+                  maxWidth: expandedPopup === panel.id_panel ? '600px' : '300px',
+                  maxHeight: '500px', 
+                  overflow: 'auto',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                <div style={{ marginBottom: '10px' }}>
+                  <strong style={{ fontSize: '16px', textDecoration: 'underline', color: '#4CAF50' }}>
+                    PANEL DETAIL
+                  </strong>
+                  <br />
+                  <b>No APP:</b> {panel.no_app}
+                  <br />
+                  <b>Nama Jalan:</b> {panel.nama_jalan}
+                  <br />
+                  <b>Kecamatan:</b> {panel.kecamatan}
+                  <br />
+                  <b>Status:</b> {panel.status || "Tidak diketahui"}
+                </div>
+
+                <div 
+                  onClick={(e) => toggleRiwayat(panel.id_panel, e)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: '#1890ff',
+                    cursor: 'pointer',
+                    margin: '10px 0',
+                    userSelect: 'none'
+                  }}
+                >
+                  <CaretRightOutlined 
+                    style={{ 
+                      transform: expandedPopup === panel.id_panel ? 'rotate(90deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s',
+                      marginRight: '5px'
+                    }} 
+                  />
+                  <span>
+                    {loadingRiwayat[panel.id_panel] 
+                      ? 'Memuat Riwayat...' 
+                      : expandedPopup === panel.id_panel 
+                        ? 'Sembunyikan Riwayat' 
+                        : 'Tampilkan Riwayat'}
+                  </span>
+                </div>
+
+                {expandedPopup === panel.id_panel && (
+                  <div style={{ marginTop: '10px' }}>
+                    {riwayatData[panel.id_panel] ? (
+                      riwayatData[panel.id_panel].length > 0 ? (
+                        <Table
+                          columns={columns}
+                          dataSource={riwayatData[panel.id_panel]}
+                          size="small"
+                          pagination={{ pageSize: 3 }}
+                          scroll={{ x: true }}
+                          expandable={{
+                            expandedRowRender,
+                            rowExpandable: () => true,
+                          }}
+                        />
+                      ) : (
+                        <p>Tidak ada data riwayat</p>
+                      )
+                    ) : (
+                      <p>Memuat data riwayat...</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </div>
   );
 };
 
-export default DataRiwayatPanel;
+export default PemetaanPanelPage;

@@ -38,6 +38,9 @@ const Header = () => {
   const texts = {
     ID: {
       home: 'Beranda',
+      mapping: 'Pemetaan',
+      panel: 'Panel',
+      apj: 'APJ',
       about: 'Tentang Kami',
       media: 'Media',
       contact: 'Kontak',
@@ -50,6 +53,9 @@ const Header = () => {
     },
     EN: {
       home: 'Home',
+      mapping: 'Mapping',
+      panel: 'Panel',
+      apj: 'APJ',
       about: 'About Us',
       media: 'Media',
       contact: 'Contact',
@@ -133,6 +139,18 @@ const Header = () => {
           <ul className='lg:flex lg:gap-x-10 max-lg:space-y-3 max-lg:fixed max-lg:bg-black max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50'>
             <li className='max-lg:border-b max-lg:border-white max-lg:py-3'>
               <a href='/' className='text-white hover:text-blue-400 text-[15px] font-bold block'>{texts[language].home}</a>
+            </li>
+            <li className='group max-lg:border-b max-lg:border-white max-lg:py-3 relative'>
+              <a className='text-white hover:text-blue-400 text-[15px] font-bold lg:hover:fill-[#007bff] block'>
+                {texts[language].mapping}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" className="ml-1 inline-block" viewBox="0 0 24 24">
+                  <path d="M12 16a1 1 0 0 1-.71-.29l-6-6a1 1 0 0 1 1.42-1.42l5.29 5.3 5.29-5.29a1 1 0 0 1 1.41 1.41l-6 6a1 1 0 0 1-.7.29z" fill="white" />
+                </svg>
+              </a>
+              <ul className='absolute shadow-lg bg-white space-y-3 lg:top-5 max-lg:top-8 -left-6 min-w-[250px] z-50 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-[700px] px-6 group-hover:pb-4 group-hover:pt-6 transition-all duration-500'>
+                <li className='border-b py-2'><a href='/pemetaan/panel' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].panel}</a></li>
+                <li className='border-b py-2'><a href='/pemetaan/apj' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].apj}</a></li>
+              </ul>
             </li>
             <li className='group max-lg:border-b max-lg:border-white max-lg:py-3 relative'>
               <a className='text-white hover:text-blue-400 text-[15px] font-bold lg:hover:fill-[#007bff] block'>

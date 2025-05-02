@@ -9,6 +9,8 @@ import AreaOperasiKamiPage from "pages/TentangKami/AreaOperasiKamiPage";
 import LayananKamiPage from "pages/TentangKami/LayananKamiPage";
 import SejarahKamiPage from "pages/TentangKami/SejarahKamiPage";
 import TeamKamiPage from "pages/TentangKami/TeamKamiPage";
+import PemetaanPJUPageUsers from "parts/PemetaanPJUPage";
+import PemetaanPanelPageUsers from "parts/PemetaanPanelPage";
 
 import DetailMediaPage from "pages/Media/DetailMediaPage";
 import BeritaPage from "pages/Media/BeritaPage";
@@ -61,6 +63,8 @@ function App() {
   // Daftar halaman di mana tombol WhatsApp harus ditampilkan
   const allowedPaths = [
     "/",
+    "/pemetaan/apj",
+    "/pemetaan/panel",
     "/tentangkami",
     "/tentangkami/sekilas",
     "/tentangkami/area-operasi",
@@ -79,6 +83,8 @@ function App() {
       <Routes>
         {/* Rute Publik */}
         <Route exact path="/" element={<LandingPage />} />
+        <Route path="/pemetaan/apj" element={<PemetaanPJUPageUsers />} />
+        <Route path="/pemetaan/panel" element={<PemetaanPanelPageUsers />} />
         <Route path="/tentangkami" element={<DetailTentangKamiPage />} />
         <Route path="/tentangkami/sekilas" element={<SekilasTentangKamiPage />} />
         <Route path="/tentangkami/area-operasi" element={<AreaOperasiKamiPage />} />

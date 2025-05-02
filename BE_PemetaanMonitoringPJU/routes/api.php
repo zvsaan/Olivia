@@ -23,6 +23,10 @@ Route::get('/userberita', [BeritaController::class, 'getBeritaPagination']);
 Route::get('/userberitaterbaru', [BeritaController::class, 'getBeritaTerbaru']);
 Route::get('/userberita/{slug}', [BeritaController::class, 'showtextrandom']);
 Route::get('/userteams', [TeamController::class, 'index']); 
+//Pemetaan
+Route::get('/pemetaanpanel-users', [RiwayatPanelController::class, 'getPanelsWithStatus']);
+Route::get('/pemetaanapj-users', [RiwayatPJUController::class, 'getPjusWithStatus']);
+Route::get('/kecamatan-list-pemetaanpju', [PJUController::class, 'getKecamatanList']);
 
 //Auth
 Route::post('/login', [AuthController::class, 'login']);
