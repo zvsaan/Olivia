@@ -113,8 +113,8 @@ const Header = () => {
         <a href="/" className='flex items-center space-x-3 rtl:space-x-reverse'>
           <img src={logo} className="h-8" alt="TTMT Logo" />
           <span className="self-center text-xl font-semibold whitespace-nowrap text-white">
-            <span className="hidden lg:inline">PT TRI TUNGGAL MADIUN TERANG</span>
-            <span className="lg:hidden">PT TTMT</span>
+            <span className="hidden lg:inline">SIGAP</span>
+            <span className="lg:hidden">SIGAP</span>
           </span>
         </a>
 
@@ -162,7 +162,7 @@ const Header = () => {
               <ul className='absolute shadow-lg bg-white space-y-3 lg:top-5 max-lg:top-8 -left-6 min-w-[250px] z-50 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-[700px] px-6 group-hover:pb-4 group-hover:pt-6 transition-all duration-500'>
                 <li className='border-b py-2'><a href='/tentangkami' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].aboutUs}</a></li>
                 <li className='border-b py-2'><a href='/tentangkami/sekilas' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].overview}</a></li>
-                <li className='border-b py-2'><a href='/tentangkami/sejarah' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].history}</a></li>
+                {/* <li className='border-b py-2'><a href='/tentangkami/sejarah' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].history}</a></li> */}
                 <li className='border-b py-2'><a href='/tentangkami/area-operasi' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].operations}</a></li>
                 <li className='border-b py-2'><a href='/tentangkami/layanan' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].services}</a></li>
                 <li className='border-b py-2'><a href='/tentangkami/team' className='text-black hover:text-[#007bff] text-[15px] font-bold block'>{texts[language].team}</a></li>

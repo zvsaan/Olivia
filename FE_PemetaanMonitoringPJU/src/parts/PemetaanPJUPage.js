@@ -133,7 +133,7 @@ const PemetaanPJUPage = () => {
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
       <button
-        onClick={() => navigate('/app/admin/dashboard')}
+        onClick={() => navigate('/')}
         style={{
           position: 'absolute',
           bottom: '20px',
@@ -149,7 +149,7 @@ const PemetaanPJUPage = () => {
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         }}
       >
-        Back to Dashboard
+        Back to Beranda
       </button>
 
       {/* Dropdown Kecamatan */}
@@ -223,7 +223,7 @@ const PemetaanPJUPage = () => {
             <Popup>
               <div style={{ fontSize: '14px', lineHeight: '1.5' }}>
                 <strong style={{ fontSize: '16px', textDecoration: 'underline', color: '#4CAF50' }}>
-                  PJU DETAIL
+                  APJ DETAIL
                 </strong>
                 <br />
                 <b>No Tiang:</b> {pju.no_tiang_baru}
@@ -245,7 +245,7 @@ const PemetaanPJUPage = () => {
                     fontSize: '14px',
                   }}
                 >
-                  Riwayat PJU
+                  Riwayat APJ
                 </button>
               </div>
             </Popup>

@@ -1,6 +1,6 @@
 /* eslint-disable */
 import React, { useState } from 'react';
-import { Fade } from 'react-awesome-reveal'; // Import Fade dari react-awesome-reveal
+import { Fade } from 'react-awesome-reveal';
 import image from '../../assets/images/tujuanKami/bgTujuanKami.jpg';
 import image2 from '../../assets/images/tujuanKami/thumbnailTujuanKami.jpeg';
 
@@ -41,13 +41,14 @@ const TentangKami = () => {
       <div className="relative z-10 text-left flex justify-between items-start">
         <div className="w-full lg:w-1/2">
           <Fade triggerOnce direction="up" delay={200}>
-            <h2 className="text-3xl font-bold">Tentang Kami</h2>
+            <h2 className="text-3xl font-bold">Tentang Sistem Kami</h2>
           </Fade>
           <Fade triggerOnce direction="up" delay={400}>
             <p className="text-lg mt-4">
-              PT Tri Tunggal Madiun Terang berkomitmen untuk menerangi jalan-jalan di wilayah
-              Kabupaten Madiun dengan sistem penerangan yang handal dan efisien,
-              memberikan rasa aman dan nyaman untuk semua pengguna jalan.
+              SIGAP merupakan solusi terintegrasi untuk 
+              mengelola data penerangan jalan umum secara komprehensif. Sistem ini 
+              memungkinkan pemetaan lokasi, pelacakan riwayat maintenance, 
+              serta dokumentasi historis seluruh kejadian terkait APJ dalam beberapa tahun terakhir.
             </p>
           </Fade>
         </div>
@@ -82,7 +83,7 @@ const TentangKami = () => {
             onClick={handleVideoClick}
           >
             <div className="w-full h-full flex items-center justify-center bg-black bg-opacity-50 text-white text-xl font-bold">
-              Play Video
+              Demo Sistem
             </div>
           </div>
         </Fade>
@@ -93,13 +94,13 @@ const TentangKami = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-black p-6 rounded-lg w-11/12 sm:w-1/2">
             <Fade triggerOnce direction="up">
-              <h2 className="text-2xl font-bold text-white mb-4">Tentang Kami PT Tri Tunggal Madiun Terang</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">Demo Sistem Manajemen PJU</h2>
             </Fade>
             <iframe
               width="100%"
               height="315"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ" // Ganti dengan link video YouTube Anda
-              title="YouTube video player"
+              src="https://www.youtube.com/embed/VIDEO_DEMO_ANDA" 
+              title="Demo Sistem Manajemen PJU"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -109,7 +110,7 @@ const TentangKami = () => {
                 className="bg-red-500 text-white py-2 px-6 rounded-full hover:bg-red-600"
                 onClick={closeModal}
               >
-                Close
+                Tutup
               </button>
             </div>
           </div>

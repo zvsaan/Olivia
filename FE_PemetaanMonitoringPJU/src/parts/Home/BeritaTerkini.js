@@ -11,7 +11,7 @@ const BeritaTerkini = () => {
     // Fetch the latest 3 news articles when the component mounts
     axios.get('http://localhost:8000/api/userberitaterbaru')
       .then(response => {
-        setBeritaTerkini(response.data); // Set the fetched berita to the state
+        setBeritaTerkini(response.data);
       })
       .catch(error => {
         console.error("Error fetching berita terkini:", error);
@@ -24,11 +24,13 @@ const BeritaTerkini = () => {
       <div className="text-left mb-12 flex justify-between items-start">
         <div className="w-full lg:w-1/2">
           <Fade triggerOnce direction="up" delay={200}>
-            <h2 className="text-3xl font-bold">Berita Terkini</h2>
+            <h2 className="text-3xl font-bold">Update Terkini</h2>
           </Fade>
           <Fade triggerOnce direction="up" delay={400}>
             <p className="text-lg mt-4">
-            PT Tri Tunggal Madiun Terang terus berupaya memberikan layanan Alat Penerangan Jalan (APJ) yang aman dan efisien di Kabupaten Madiun. Kami berkomitmen untuk mendukung pengembangan infrastruktur berkelanjutan demi kemajuan bersama.
+              Sistem SIGAP terus berkembang dalam menyediakan solusi manajemen penerangan jalan berbasis data. 
+              Dapatkan informasi terbaru tentang inovasi sistem, perkembangan implementasi, dan capaian terbaru 
+              dalam pengelolaan infrastruktur penerangan.
             </p>
           </Fade>
         </div>

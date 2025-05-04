@@ -108,7 +108,7 @@ const PemetaanPanelPage = () => {
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
       <button
-        onClick={() => navigate('/app/admin/dashboard')}
+        onClick={() => navigate('/')}
         style={{
           position: 'absolute',
           bottom: '20px',
@@ -124,7 +124,7 @@ const PemetaanPanelPage = () => {
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         }}
       >
-        Back to Dashboard
+        Back to Beranda
       </button>
 
       {/* Loading Screen */}
