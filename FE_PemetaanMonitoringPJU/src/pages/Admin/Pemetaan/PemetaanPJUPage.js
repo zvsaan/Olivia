@@ -65,7 +65,7 @@ const PemetaanPJUPage = () => {
     const headers = { Authorization: `Bearer ${authToken}` };
   
     axios
-      .get('http://localhost:8000/api/kecamatan-list', { headers })
+      .get('https://be-sigap.tifpsdku.com/api/kecamatan-list', { headers })
       .then((response) => setKecamatanList(response.data || []))
       .catch((error) => {
         console.error('Error fetching kecamatan list:', error);
@@ -96,7 +96,7 @@ const PemetaanPJUPage = () => {
   
       // Fetch PJU data
       axios
-        .get(`http://localhost:8000/api/pjus-with-status?kecamatan=${selectedKecamatan}`, { headers })
+        .get(`https://be-sigap.tifpsdku.com/api/pjus-with-status?kecamatan=${selectedKecamatan}`, { headers })
         .then((response) => {
           const data = response.data.data || [];
           setPjuData(data);
@@ -118,7 +118,7 @@ const PemetaanPJUPage = () => {
     setLoadingRiwayat(prev => ({ ...prev, [pjuId]: true }));
     try {
       const headers = { Authorization: `Bearer ${authToken}` };
-      const response = await axios.get(`http://localhost:8000/api/riwayat-pju/${pjuId}`, { headers });
+      const response = await axios.get(`https://be-sigap.tifpsdku.com/api/riwayat-pju/${pjuId}`, { headers });
       
       const { riwayat_pjus = [], pengaduan_details = [] } = response.data;
 

@@ -10,31 +10,39 @@ const ChatPopup = () => {
   const toggleChat = () => {
     setIsOpen(!isOpen);
     if (!isOpen) {
-      setChatHistory([]); // Reset chat history when closing
+      setChatHistory([]);
       setUserInput("");
     }
   };
 
   const faqs = [
     {
-      question: "Apa itu TTMT?",
-      answer: "TTMT adalah singkatan dari Tri Tunggal Madiun Terang, sebuah organisasi yang menyediakan berbagai layanan terkait penerangan jalan."
+      question: "Apa itu SIGAP?",
+      answer: "SIGAP adalah Sistem Informasi Geospasial Analitik Penerangan yang membantu pengelolaan infrastruktur penerangan jalan berbasis data."
     },
     {
-      question: "Apa saja layanan yang disediakan oleh Tri Tunggal Madiun Terang?",
-      answer: "TTMT menyediakan layanan seperti perbaikan lampu jalan, pengaduan kerusakan."
+      question: "Apa saja fitur utama SIGAP?",
+      answer: "SIGAP menyediakan pemetaan digital, manajemen data historis, sistem pelaporan, dan analisis kinerja penerangan jalan."
     },
     {
-      question: "Dimana kita bisa melakukan pengaduan APJ?",
-      answer: "Pengaduan dapat dilakukan melalui whatsApp atau dengan menghubungi layanan kita."
+      question: "Bagaimana cara melaporkan masalah penerangan jalan?",
+      answer: "Anda dapat melaporkan melalui fitur pelaporan terpadu di sistem SIGAP atau menghubungi layanan pengaduan resmi."
     }
   ];
 
   const additionalFAQs = [
-    { question: "Bagaimana cara menghubungi TTMT?", answer: "Anda dapat menghubungi TTMT melalui nomor hotline kita atau email resmi yang tersedia di website kita." },
-    { question: "Apa jam operasional TTMT?", answer: "TTMT beroperasi setiap hari dari pukul 08.00 hingga 17.00." },
-    { question: "Apakah TTMT melayani pemasangan lampu jalan baru?", answer: "Tidak, kita hanya melakukan pemeliharaan terhadap lampu yang sudah dipasang" }
-    // Tambahkan pertanyaan lainnya di sini
+    { 
+      question: "Bagaimana cara mengakses SIGAP?", 
+      answer: "SIGAP dapat diakses melalui platform web resmi atau aplikasi mobile yang disediakan." 
+    },
+    { 
+      question: "Apakah SIGAP tersedia untuk publik?", 
+      answer: "SIGAP memiliki beberapa fitur yang dapat diakses publik, sementara fitur manajemen lengkap tersedia untuk petugas berwenang." 
+    },
+    { 
+      question: "Teknologi apa yang digunakan SIGAP?", 
+      answer: "SIGAP menggunakan teknologi geospasial, analitik data, dan sistem manajemen berbasis cloud untuk pengelolaan yang optimal." 
+    }
   ];
 
   const handleFAQClick = (faq) => {
@@ -51,14 +59,16 @@ const ChatPopup = () => {
 
   const handleUserSubmit = () => {
     if (userInput.trim()) {
-      const matchedFAQ = [...faqs, ...additionalFAQs].find(faq => faq.question.toLowerCase() === userInput.trim().toLowerCase());
+      const matchedFAQ = [...faqs, ...additionalFAQs].find(faq => 
+        faq.question.toLowerCase() === userInput.trim().toLowerCase()
+      );
 
       setChatHistory((prev) => [
         ...prev,
         { sender: "user", message: userInput },
         {
           sender: "bot",
-          message: matchedFAQ ? matchedFAQ.answer : "Maaf, saya belum memiliki informasi untuk pertanyaan ini. Silakan hubungi layanan pelanggan TTMT untuk bantuan lebih lanjut."
+          message: matchedFAQ ? matchedFAQ.answer : "Maaf, pertanyaan Anda belum bisa saya jawab. Silakan hubungi tim dukungan SIGAP untuk bantuan lebih lanjut."
         }
       ]);
       setUserInput("");
@@ -67,7 +77,7 @@ const ChatPopup = () => {
 
   return (
     <div>
-      {/* Icon Button */}
+      {/* Chat Button */}
       <div
         className="fixed bottom-4 right-4 bg-blue-500 text-white p-4 rounded-full shadow-lg cursor-pointer hover:bg-blue-600 transition duration-300"
         onClick={toggleChat}
@@ -76,14 +86,14 @@ const ChatPopup = () => {
         {isOpen ? <FaTimes size={24} /> : <FaComments size={24} />}
       </div>
 
-      {/* Popup Chat Window */}
+      {/* Chat Window */}
       {isOpen && (
         <div
           className="fixed bottom-16 right-4 w-80 bg-white shadow-lg rounded-lg overflow-hidden border border-gray-300"
           style={{ zIndex: 1000 }}
         >
           <div className="bg-blue-500 text-white p-4 flex items-center justify-between">
-            <h4 className="text-lg font-semibold">Tanya TTMT</h4>
+            <h4 className="text-lg font-semibold">Bantuan SIGAP</h4>
             <FaTimes
               size={20}
               className="cursor-pointer"
@@ -128,7 +138,7 @@ const ChatPopup = () => {
             <textarea
               rows="2"
               className="w-full border rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4"
-              placeholder="Ketik pertanyaan Anda..."
+              placeholder="Tanyakan tentang SIGAP..."
               value={userInput}
               onChange={handleInputChange}
             ></textarea>

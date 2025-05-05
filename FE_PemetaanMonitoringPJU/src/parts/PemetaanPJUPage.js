@@ -54,7 +54,7 @@ const PemetaanPJUPage = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:8000/api/kecamatan-list-pemetaanpju')
+      .get('https://be-sigap.tifpsdku.com/api/kecamatan-list-pemetaanpju')
       .then((response) => setKecamatanList(response.data || []))
       .catch((error) => {
         console.error('Error fetching kecamatan list:', error);
@@ -83,7 +83,7 @@ const PemetaanPJUPage = () => {
   
       // Fetch PJU data
       axios
-        .get(`http://localhost:8000/api/pemetaanapj-users?kecamatan=${selectedKecamatan}`)
+        .get(`https://be-sigap.tifpsdku.com/api/pemetaanapj-users?kecamatan=${selectedKecamatan}`)
         .then((response) => {
           const data = response.data.data || [];
           setPjuData(data);

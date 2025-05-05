@@ -9,7 +9,7 @@ const BeritaTerkini = () => {
   
   useEffect(() => {
     // Fetch the latest 3 news articles when the component mounts
-    axios.get('http://localhost:8000/api/userberitaterbaru')
+    axios.get('https://be-sigap.tifpsdku.com/api/userberitaterbaru')
       .then(response => {
         setBeritaTerkini(response.data);
       })

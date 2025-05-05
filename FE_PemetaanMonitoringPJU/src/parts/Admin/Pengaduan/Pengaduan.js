@@ -29,7 +29,7 @@ const DataPengaduan = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/api/pengaduan', {
+      const response = await axios.get('https://be-sigap.tifpsdku.com/api/pengaduan', {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       setPengaduan(response.data);
@@ -63,7 +63,7 @@ const DataPengaduan = () => {
   useEffect(() => {
     const fetchOptionsPanel = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/panels', {
+        const response = await axios.get('https://be-sigap.tifpsdku.com/api/panels', {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         console.log('Panel Data:', response.data); // Debugging
@@ -92,7 +92,7 @@ const DataPengaduan = () => {
 
       if (isEditMode && selectedPengaduan) {
         await axios.post(
-          `http://localhost:8000/api/pengaduan/${selectedPengaduan.id_pengaduan}?_method=PUT`,
+          `https://be-sigap.tifpsdku.com/api/pengaduan/${selectedPengaduan.id_pengaduan}?_method=PUT`,
           formData,
           {
             headers: {
@@ -103,7 +103,7 @@ const DataPengaduan = () => {
         );
         message.success('Data pengaduan berhasil diperbarui');
       } else {
-        await axios.post('http://localhost:8000/api/pengaduan', formData, {
+        await axios.post('https://be-sigap.tifpsdku.com/api/pengaduan', formData, {
           headers: {
             Authorization: `Bearer ${authToken}`,
             'Content-Type': 'multipart/form-data',
@@ -129,7 +129,7 @@ const DataPengaduan = () => {
       cancelText: 'Batal',
       onOk: async () => {
         try {
-          await axios.delete(`http://localhost:8000/api/pengaduan/${record.id_pengaduan}`, {
+          await axios.delete(`https://be-sigap.tifpsdku.com/api/pengaduan/${record.id_pengaduan}`, {
             headers: { Authorization: `Bearer ${authToken}` },
           });
           notification.success({ message: 'Data pengaduan berhasil dihapus' });

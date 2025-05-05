@@ -13,7 +13,7 @@ const PrivateRoute = ({ allowedRoles }) => {
     const validateToken = async () => {
       try {
         const response = await axios.post(
-          'http://localhost:8000/api/validate-token',
+          'https://be-sigap.tifpsdku.com/api/validate-token',
           {},
           {
             headers: {
