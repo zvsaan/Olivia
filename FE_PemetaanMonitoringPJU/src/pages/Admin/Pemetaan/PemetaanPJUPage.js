@@ -309,6 +309,45 @@ const PemetaanPJUPage = () => {
 
       {/* Peta */}
       <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }}>
+        <div className="map-legend" style={{
+        position: 'absolute',
+        bottom: '30px',
+        right: '10px',
+        zIndex: 1000,
+        backgroundColor: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+        maxWidth: '200px'
+      }}>
+        <h4 style={{ marginBottom: '10px', textAlign: 'center' }}>Legenda Status</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          {Object.entries(statusColors).map(([status, color]) => (
+            <div key={status} style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                backgroundColor: color,
+                borderRadius: '50%',
+                border: '1px solid #333',
+                marginRight: '8px'
+              }} />
+              <span>{status}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+            <div style={{
+              width: '20px',
+              height: '20px',
+              backgroundColor: '#808080',
+              borderRadius: '50%',
+              border: '1px solid #333',
+              marginRight: '8px'
+            }} />
+            <span>Default/Tidak diketahui</span>
+          </div>
+        </div>
+      </div>
         <MapViewUpdater center={mapCenter} zoom={mapZoom} />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
