@@ -76,7 +76,7 @@ const PemetaanPanelPage = () => {
 
         // Fetch panel data dari API dengan authorization
         const headers = { Authorization: `Bearer ${authToken}` };
-        const panelResponse = await axios.get('https://be-sigap.tifpsdku.com/api/panels-with-status', { headers });
+        const panelResponse = await axios.get('http://localhost:8000/api/panels-with-status', { headers });
         setPanelData(panelResponse.data || []);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -92,7 +92,7 @@ const PemetaanPanelPage = () => {
     setLoadingRiwayat(prev => ({ ...prev, [panelId]: true }));
     try {
       const headers = { Authorization: `Bearer ${authToken}` };
-      const response = await axios.get(`https://be-sigap.tifpsdku.com/api/riwayat-panel/${panelId}`, { headers });
+      const response = await axios.get(`http://localhost:8000/api/riwayat-panel/${panelId}`, { headers });
 
       const { riwayat_panels = [], pengaduan_details = [] } = response.data;
 

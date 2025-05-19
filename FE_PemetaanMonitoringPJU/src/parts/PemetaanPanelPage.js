@@ -66,7 +66,7 @@ const PemetaanPanelPage = () => {
         setGeoJsonData(validGeoJson);
 
         // Fetch panel data dari API tanpa authorization
-        const panelResponse = await axios.get('https://be-sigap.tifpsdku.com/api/pemetaanpanel-users');
+        const panelResponse = await axios.get('http://localhost:8000/api/pemetaanpanel-users');
         setPanelData(panelResponse.data || []);
       } catch (error) {
         console.error('Error loading data:', error);
