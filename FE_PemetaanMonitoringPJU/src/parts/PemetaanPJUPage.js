@@ -5,6 +5,11 @@ import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-l
 import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
+import { Table, Tag, Collapse } from 'antd';
+import { CaretRightOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+
+const { Panel } = Collapse;
 
 // Warna kecamatan
 const kecamatanColors = {
@@ -41,6 +46,9 @@ const PemetaanPJUPage = () => {
   const [mapCenter, setMapCenter] = useState([-7.5625922, 111.5778515]);
   const [mapZoom, setMapZoom] = useState(12);
   const [isLoading, setIsLoading] = useState(false);
+  const [riwayatData, setRiwayatData] = useState({});
+  const [loadingRiwayat, setLoadingRiwayat] = useState({});
+  const [expandedPopup, setExpandedPopup] = useState(null);
 
   const navigate = useNavigate();
 
@@ -53,8 +61,7 @@ const PemetaanPJUPage = () => {
   };
 
   useEffect(() => {
-    axios
-      .get('https://be-sigap.tifpsdku.com/api/kecamatan-list-pemetaanpju')
+    axios.get('http://localhost:8000/api/kecamatan-list-pemetaanpju')
       .then((response) => setKecamatanList(response.data || []))
       .catch((error) => {
         console.error('Error fetching kecamatan list:', error);
@@ -83,7 +90,7 @@ const PemetaanPJUPage = () => {
   
       // Fetch PJU data
       axios
-        .get(`https://be-sigap.tifpsdku.com/api/pemetaanapj-users?kecamatan=${selectedKecamatan}`)
+        .get(`http://localhost:8000/api/pemetaanapj-users?kecamatan=${selectedKecamatan}`)
         .then((response) => {
           const data = response.data.data || [];
           setPjuData(data);
@@ -101,6 +108,53 @@ const PemetaanPJUPage = () => {
     }
   }, [selectedKecamatan]);  
 
+  const fetchRiwayatPJU = async (pjuId) => {
+    setLoadingRiwayat(prev => ({ ...prev, [pjuId]: true }));
+    try {
+      const response = await axios.get(`http://localhost:8000/api/riwayat-pju-users/${pjuId}`);
+      
+      // Handle both single object and array cases
+      let riwayatItems = [];
+      let pengaduanItems = [];
+
+      // Process riwayat data
+      if (response.data.riwayat_pju) {
+        riwayatItems.push({
+          ...response.data.riwayat_pju,
+          source: "Riwayat"
+        });
+      }
+
+      // Process pengaduan data
+      if (response.data.pengaduan_detail) {
+        pengaduanItems.push({
+          id_riwayat_pju: response.data.pengaduan_detail.id_detail_pengaduan,
+          lokasi: response.data.pengaduan_detail.pengaduan?.lokasi || "",
+          tanggal_masalah: response.data.pengaduan_detail.pengaduan?.tanggal_pengaduan || "",
+          jam_masalah: response.data.pengaduan_detail.pengaduan?.jam_aduan || "",
+          keterangan_masalah: response.data.pengaduan_detail.pengaduan?.keterangan_masalah || "",
+          uraian_masalah: response.data.pengaduan_detail.pengaduan?.uraian_masalah || "",
+          tanggal_penyelesaian: response.data.pengaduan_detail.pengaduan?.tanggal_penyelesaian || "",
+          jam_penyelesaian: response.data.pengaduan_detail.pengaduan?.jam_penyelesaian || "",
+          durasi_penyelesaian: response.data.pengaduan_detail.pengaduan?.durasi_penyelesaian || "",
+          penyelesaian_masalah: response.data.pengaduan_detail.pengaduan?.penyelesaian_masalah || "",
+          pencegahan: response.data.pengaduan_detail.pengaduan?.pencegahan_masalah || "",
+          nomor_rujukan: response.data.pengaduan_detail.pengaduan?.nomor_pengaduan || "",
+          status: response.data.pengaduan_detail.pengaduan?.status || "",
+          source: "Pengaduan",
+        });
+      }
+
+      const combinedData = [...riwayatItems, ...pengaduanItems];
+      setRiwayatData(prev => ({ ...prev, [pjuId]: combinedData }));
+    } catch (error) {
+      console.error("Error fetching Riwayat PJU:", error);
+      setRiwayatData(prev => ({ ...prev, [pjuId]: [] }));
+    } finally {
+      setLoadingRiwayat(prev => ({ ...prev, [pjuId]: false }));
+    }
+  };
+
   const handleKecamatanChange = (event) => {
     setSelectedKecamatan(event.target.value);
     setGeoJsonData(null);
@@ -114,7 +168,7 @@ const PemetaanPJUPage = () => {
   });
 
   const getCustomMarkerIcon = (status) => {
-    const color = statusColors[status] || "#808080"; // Default gray color
+    const color = statusColors[status] || "#808080";
     const svgIcon = `
       <svg xmlns="http://www.w3.org/2000/svg" width="30" height="45" viewBox="0 0 24 36">
         <path d="M12 0C7 0 3 4 3 9c0 6.5 9 18 9 18s9-11.5 9-18c0-5-4-9-9-9z" fill="${color}" stroke="#3a3a3a" stroke-width="1"/>
@@ -130,10 +184,75 @@ const PemetaanPJUPage = () => {
     });
   };
 
+  const columns = [
+    {
+      title: "No",
+      dataIndex: "id_riwayat_pju",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "Lokasi",
+      dataIndex: "lokasi",
+      render: (lokasi) => (lokasi ? lokasi : "-"),
+    },
+    {
+      title: "Tanggal Masalah",
+      dataIndex: "tanggal_masalah",
+      render: (date) => (date ? dayjs(date).format("DD MMMM YYYY") : "-"),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (status) => {
+        if (!status) return <Tag color="default">-</Tag>;
+        let color;
+        switch (status) {
+          case "Pending": color = "gold"; break;
+          case "Proses": color = "blue"; break;
+          case "Selesai": color = "green"; break;
+          default: color = "default";
+        }
+        return <Tag color={color}>{status}</Tag>;
+      },
+    },
+    {
+      title: "Sumber",
+      dataIndex: "source",
+      render: (text) => <Tag>{text}</Tag>,
+    },
+  ];
+
+  const expandedRowRender = (record) => {
+    return (
+      <div style={{ margin: 0, padding: 0 }}>
+        <p><strong>Jam Masalah:</strong> {record.jam_masalah || "-"}</p>
+        <p><strong>Keterangan Masalah:</strong> {record.keterangan_masalah || "-"}</p>
+        <p><strong>Uraian Masalah:</strong> {record.uraian_masalah || "-"}</p>
+        <p><strong>Tanggal Penyelesaian:</strong> {record.tanggal_penyelesaian ? dayjs(record.tanggal_penyelesaian).format("DD MMMM YYYY") : "-"}</p>
+        <p><strong>Jam Penyelesaian:</strong> {record.jam_penyelesaian || "-"}</p>
+        <p><strong>Durasi Penyelesaian:</strong> {record.durasi_penyelesaian || "-"}</p>
+        <p><strong>Penyelesaian Masalah:</strong> {record.penyelesaian_masalah || "-"}</p>
+        <p><strong>Pencegahan:</strong> {record.pencegahan || "-"}</p>
+        <p><strong>Nomor Rujukan:</strong> {record.nomor_rujukan || "-"}</p>
+      </div>
+    );
+  };
+
+  const toggleRiwayat = (pjuId) => {
+    if (expandedPopup === pjuId) {
+      setExpandedPopup(null);
+    } else {
+      setExpandedPopup(pjuId);
+      if (!riwayatData[pjuId]) {
+        fetchRiwayatPJU(pjuId);
+      }
+    }
+  };
+
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/app/admin/dashboard')}
         style={{
           position: 'absolute',
           bottom: '20px',
@@ -149,7 +268,7 @@ const PemetaanPJUPage = () => {
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         }}
       >
-        Back to Beranda
+        Back to Dashboard
       </button>
 
       {/* Dropdown Kecamatan */}
@@ -191,6 +310,45 @@ const PemetaanPJUPage = () => {
 
       {/* Peta */}
       <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }}>
+        <div className="map-legend" style={{
+        position: 'absolute',
+        bottom: '30px',
+        right: '10px',
+        zIndex: 1000,
+        backgroundColor: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+        maxWidth: '200px'
+      }}>
+        <h4 style={{ marginBottom: '10px', textAlign: 'center' }}>Legenda Status</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          {Object.entries(statusColors).map(([status, color]) => (
+            <div key={status} style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                backgroundColor: color,
+                borderRadius: '50%',
+                border: '1px solid #333',
+                marginRight: '8px'
+              }} />
+              <span>{status}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+            <div style={{
+              width: '20px',
+              height: '20px',
+              backgroundColor: '#808080',
+              borderRadius: '50%',
+              border: '1px solid #333',
+              marginRight: '8px'
+            }} />
+            <span>Default/Tidak diketahui</span>
+          </div>
+        </div>
+      </div>
         <MapViewUpdater center={mapCenter} zoom={mapZoom} />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -221,32 +379,75 @@ const PemetaanPJUPage = () => {
             icon={getCustomMarkerIcon(pju.status)}
           >
             <Popup>
-              <div style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                <strong style={{ fontSize: '16px', textDecoration: 'underline', color: '#4CAF50' }}>
-                  APJ DETAIL
-                </strong>
-                <br />
-                <b>No Tiang:</b> {pju.no_tiang_baru}
-                <br />
-                <b>Nama Jalan:</b> {pju.nama_jalan}
-                <br />
-                <b>Status:</b> {pju.status || "Tidak diketahui"}
-                <br />
-                <button
-                  onClick={() => navigate(`/app/admin/data-riwayat-pju/${pju.id_pju}`)}
+              <div style={{ 
+                maxWidth: expandedPopup === pju.id_pju ? '600px' : '300px',
+                maxHeight: '500px', 
+                overflow: 'auto',
+                transition: 'all 0.3s ease'
+              }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong style={{ fontSize: '16px', textDecoration: 'underline', color: '#4CAF50' }}>
+                    APJ DETAIL
+                  </strong>
+                  <br />
+                  <b>No Tiang:</b> {pju.no_tiang_baru}
+                  <br />
+                  <b>Nama Jalan:</b> {pju.nama_jalan}
+                  <br />
+                  <b>Status:</b> {pju.status || "Tidak diketahui"}
+                </div>
+
+                <div 
+                  onClick={() => toggleRiwayat(pju.id_pju)}
                   style={{
-                    marginTop: '10px',
-                    padding: '8px 16px',
-                    backgroundColor: '#007BFF',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: '#1890ff',
                     cursor: 'pointer',
-                    fontSize: '14px',
+                    margin: '10px 0',
+                    userSelect: 'none'
                   }}
                 >
-                  Riwayat APJ
-                </button>
+                  <CaretRightOutlined 
+                    style={{ 
+                      transform: expandedPopup === pju.id_pju ? 'rotate(90deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s',
+                      marginRight: '5px'
+                    }} 
+                  />
+                  <span>
+                    {loadingRiwayat[pju.id_pju] 
+                      ? 'Memuat Riwayat...' 
+                      : expandedPopup === pju.id_pju 
+                        ? 'Sembunyikan Riwayat' 
+                        : 'Tampilkan Riwayat'}
+                  </span>
+                </div>
+
+                {expandedPopup === pju.id_pju && (
+                  <div style={{ marginTop: '10px' }}>
+                    {console.log('Riwayat Data:', riwayatData[pju.id_pju])} {/* Add this line */}
+                    {riwayatData[pju.id_pju] ? (
+                      riwayatData[pju.id_pju].length > 0 ? (
+                        <Table
+                          columns={columns}
+                          dataSource={riwayatData[pju.id_pju]}
+                          size="small"
+                          pagination={{ pageSize: 3 }}
+                          scroll={{ x: true }}
+                          expandable={{
+                            expandedRowRender,
+                            rowExpandable: () => true,
+                          }}
+                        />
+                      ) : (
+                        <p>Tidak ada data riwayat</p>
+                      )
+                    ) : (
+                      <p>Memuat data riwayat...</p>
+                    )}
+                  </div>
+                )}
               </div>
             </Popup>
           </Marker>

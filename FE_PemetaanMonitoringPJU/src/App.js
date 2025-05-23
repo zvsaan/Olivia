@@ -66,8 +66,8 @@ function App() {
   // Daftar halaman di mana tombol WhatsApp harus ditampilkan
   const allowedPaths = [
     "/",
-    "/pemetaan/apj",
-    "/pemetaan/panel",
+    // "/pemetaan/apj",
+    // "/pemetaan/panel",
     "/tentangkami",
     "/tentangkami/sekilas",
     "/tentangkami/area-operasi",

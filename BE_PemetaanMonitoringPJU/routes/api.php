@@ -17,16 +17,22 @@ use App\Http\Controllers\KonstruksiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\PengaduanController;
+use App\Http\Controllers\PemetaanController;
 
 // Route::get('/userberita', [BeritaController::class, 'index']);
 Route::get('/userberita', [BeritaController::class, 'getBeritaPagination']);
 Route::get('/userberitaterbaru', [BeritaController::class, 'getBeritaTerbaru']);
 Route::get('/userberita/{slug}', [BeritaController::class, 'showtextrandom']);
 Route::get('/userteams', [TeamController::class, 'index']); 
+
 //Pemetaan
-Route::get('/pemetaanpanel-users', [RiwayatPanelController::class, 'getPanelsWithStatus']);
-Route::get('/pemetaanapj-users', [RiwayatPJUController::class, 'getPjusWithStatus']);
+Route::get('/pemetaanpanel-users', [PemetaanController::class, 'getPanelsWithStatus']);
+Route::get('/pemetaanapj-users', [PemetaanController::class, 'getPjusWithStatus']);
 Route::get('/kecamatan-list-pemetaanpju', [PJUController::class, 'getKecamatanList']);
+//Riwayat PJU
+Route::get('/riwayat-pju-users/{pju_id}', [PemetaanController::class, 'riwayatpju']);
+//Riwayat Panel
+Route::get('/riwayat-panel-users/{panel_id}', [PemetaanController::class, 'riwayatpanel']);
 
 //Auth
 Route::post('/login', [AuthController::class, 'login']);
