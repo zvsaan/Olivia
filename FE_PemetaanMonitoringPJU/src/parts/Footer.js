@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="flex flex-col mb-6 lg:mb-0 space-y-6 lg:space-y-4 w-full lg:w-1/4">
           <h2 className="text-2xl font-semibold">Kontak Kami</h2>
           <p className="text-lg">Telepon: (021) 123-456-789</p>
-          <p className="text-lg">Email: info@pttmt.com</p>
+          <p className="text-lg">Email: infosigap@gmail.com</p>
 
           <div className="flex space-x-4 mt-4">
             <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="text-xl hover:text-[#007bff]">

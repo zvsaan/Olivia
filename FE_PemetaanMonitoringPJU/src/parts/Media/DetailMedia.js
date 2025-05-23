@@ -139,7 +139,7 @@ const DetailMedia = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-black p-6 rounded-lg w-11/12 sm:w-1/2">
             <Fade triggerOnce direction="up">
-              <h2 className="text-2xl font-bold text-white mb-4">Highlight Video PT TTMT</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">Highlight Video</h2>
             </Fade>
             <video className="w-full" controls>
               <source src={dummyVideos[currentVideoIndex].video} type="video/mp4" />

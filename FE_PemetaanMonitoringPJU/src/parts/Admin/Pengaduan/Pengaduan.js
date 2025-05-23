@@ -4,8 +4,8 @@ import axios from 'axios';
 import { Table, Button, Modal, Form, Input, message, Space, notification, Upload, Select } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import $ from 'jquery'; // import jquery
-import 'select2'; // import select2 js
-import 'select2/dist/css/select2.min.css'; // import select2 css
+import 'select2';
+import 'select2/dist/css/select2.min.css'; 
 
 const DataPengaduan = () => {
   const [form] = Form.useForm();

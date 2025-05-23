@@ -29,6 +29,9 @@ const LoginPage = () => {
         case 'visitor':
           navigate('/v1/visitor/home');
           break;
+        case 'dishub':
+          navigate('/v1/dishub/dashboard');
+          break;
         default:
           setError('Invalid role. Please contact support.');
       }
@@ -46,7 +49,7 @@ const LoginPage = () => {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-xl">
         {/* Logo */}
         <div className="text-center">
-          <h2 className="text-4xl font-extrabold text-blue-700">PT TTMT</h2>
+          <h2 className="text-4xl font-extrabold text-blue-700">LOGIN</h2>
           <p className="text-sm text-gray-600 mt-2">Please login to your account</p>
         </div>
 

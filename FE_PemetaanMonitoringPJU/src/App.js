@@ -52,6 +52,9 @@ import DataBeritaPage from "pages/Admin/InformasiWeb/DataBeritaPage";
 
 import DataPengaduanPage from "pages/Admin/Pengaduan/DataPengaduanPage";
 
+import DataPengaduanDishubPage from "pages/Dishub/DataPengaduanPage";
+import DashboardDishubPage from "pages/Dishub/DashboardPage";
+
 import Coba from "pages/Coba";
 
 import PrivateRoute from "PrivateRoute";
@@ -109,6 +112,12 @@ function App() {
           <Route path="/v1/visitor/panelpemetaan" element={<PemetaanPanelPageVisitor />} />
           <Route path="/v1/visitor/riwayatapj/:id" element={<DataRiwayatPJUPageVisitor />} />
           <Route path="/v1/visitor/riwayatpanel/:id" element={<DataRiwayatPanelPageVisitor />} />
+        </Route>
+
+        {/* Rute Visitor */}
+        <Route element={<PrivateRoute allowedRoles={["dishub"]} />}>
+          <Route path="/app/dishub/dashboard" element={<DashboardDishubPage />} />
+          <Route path="/app/dishub/pengaduan" element={<DataPengaduanDishubPage />} />
         </Route>
 
         {/* Rute Admin */}

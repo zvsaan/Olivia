@@ -111,7 +111,7 @@ const Header = () => {
       <div className="flex items-center justify-between px-5 lg:px-28 py-3 gap-4 w-full">
         {/* Logo Section */}
         <a href="/" className='flex items-center space-x-3 rtl:space-x-reverse'>
-          <img src={logo} className="h-8" alt="TTMT Logo" />
+          <img src={logo} className="h-8" alt="SIGAP Logo" />
           <span className="self-center text-xl font-semibold whitespace-nowrap text-white">
             <span className="hidden lg:inline">SIGAP</span>
             <span className="lg:hidden">SIGAP</span>

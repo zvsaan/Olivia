@@ -101,7 +101,7 @@ export default class DashboardPage extends Component {
               />
               <div className="ml-24 md:ml-36">
                 <h2 className="text-xl md:text-2xl font-bold">
-                  Welcome, Admin TTMT
+                  Welcome, Admin SIGAP
                 </h2>
                 <p>Have a nice day at work</p>
               </div>

@@ -54,6 +54,8 @@ const PrivateRoute = ({ allowedRoles }) => {
     switch (userRole) {
       case 'visitor':
         return <Navigate to="/v1/visitor/home" />;
+      case 'dishub':
+        return <Navigate to="/app/dishub/dashboard" />;
       case 'admin':
         return <Navigate to="/app/admin/dashboard" />;
       case 'superadmin':
