@@ -1,11 +1,16 @@
 /* eslint-disable */
-import React, { Component } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserShield, faUsers, faUserTie, faUserAlt } from '@fortawesome/free-solid-svg-icons';
-import SidebarDishub from 'parts/SidebarDishub';
-import HeaderAdmin from 'parts/HeaderAdmin';
-import axios from 'axios';
-import CountUp from 'react-countup';
+import React, { Component } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUserShield,
+  faUsers,
+  faUserTie,
+  faUserAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import SidebarDishub from "parts/SidebarDishub";
+import HeaderAdmin from "parts/HeaderAdmin";
+import axios from "axios";
+import CountUp from "react-countup";
 
 export default class DashboardDishubPage extends Component {
   state = {
@@ -29,10 +34,10 @@ export default class DashboardDishubPage extends Component {
   }
 
   fetchDashboardData = () => {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem("authToken");
     if (authToken) {
       axios
-        .get('https://be-sigap.tifpsdku.com/api/superadmin/dashboard-data', {
+        .get("http://localhost:8000/api/superadmin/dashboard-data", {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
@@ -41,10 +46,10 @@ export default class DashboardDishubPage extends Component {
           this.setState({ dashboardData: response.data.data });
         })
         .catch((error) => {
-          console.error('Error fetching dashboard data:', error);
+          console.error("Error fetching dashboard data:", error);
         });
     } else {
-      console.error('No auth token found in localStorage');
+      console.error("No auth token found in localStorage");
     }
   };
 
@@ -70,14 +75,18 @@ export default class DashboardDishubPage extends Component {
 
         {/* Main Content Area */}
         <div
-          className={`flex-1 min-h-screen transition-all duration-300 ${isOpen ? 'md:ml-64' : 'ml-0'}`}
+          className={`flex-1 min-h-screen transition-all duration-300 ${
+            isOpen ? "md:ml-64" : "ml-0"
+          }`}
         >
           {/* Header */}
           <HeaderAdmin />
 
           {/* Main Dashboard Content */}
           <main className="p-4 sm:p-6 w-full">
-            <h1 className="text-3xl font-bold text-cyan-600">Dishub Dashboard</h1>
+            <h1 className="text-3xl font-bold text-cyan-600">
+              Dishub Dashboard
+            </h1>
             <p>Selamat datang di panel Dishub!</p>
 
             {/* Report Section */}

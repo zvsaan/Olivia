@@ -1,9 +1,14 @@
 /* eslint-disable */
-import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faBars, faSearch, faUserCircle } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBell,
+  faBars,
+  faSearch,
+  faUserCircle,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const HeaderDishub = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -16,29 +21,32 @@ const HeaderDishub = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('https://be-sigap.tifpsdku.com/api/logout', {}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`
+      await axios.post(
+        "http://localhost:8000/api/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
         }
-      });
+      );
 
       // Remove token from local storage and redirect to login
-      localStorage.removeItem('authToken');
-      navigate('/login');
+      localStorage.removeItem("authToken");
+      navigate("/login");
     } catch (error) {
-      console.error('Logout failed:', error);
-      alert('Logout gagal. Silakan coba lagi.');
+      console.error("Logout failed:", error);
+      alert("Logout gagal. Silakan coba lagi.");
     }
   };
 
   const handleEditProfile = () => {
     setShowProfileMenu(false);
-    navigate('/admin/edit-profile');
+    navigate("/admin/edit-profile");
   };
 
   return (
     <header className="flex items-center justify-between bg-white px-4 py-5">
-
       {/* Search Bar */}
       <div className="flex items-center w-full max-w-md bg-gray-100 rounded-lg px-4 py-2 ml-2 md:ml-0">
         <FontAwesomeIcon icon={faSearch} className="text-gray-500 mr-2" />
@@ -52,7 +60,10 @@ const HeaderDishub = () => {
       {/* Right Icons */}
       <div className="flex items-center space-x-4 relative">
         {/* Notification Icon */}
-        <FontAwesomeIcon icon={faBell} className="text-gray-700 text-xl cursor-pointer" />
+        <FontAwesomeIcon
+          icon={faBell}
+          className="text-gray-700 text-xl cursor-pointer"
+        />
 
         {/* Profile Icon */}
         <div className="relative">
@@ -61,7 +72,7 @@ const HeaderDishub = () => {
             className="text-gray-700 text-2xl cursor-pointer"
             onClick={handleProfileClick}
           />
-          
+
           {/* Profile Menu Overlay */}
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
@@ -80,8 +91,12 @@ const HeaderDishub = () => {
       {showLogoutConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h2 className="text-lg font-bold text-gray-700 mb-4">Konfirmasi Logout</h2>
-            <p className="text-gray-600 mb-6">Apakah Anda yakin ingin logout?</p>
+            <h2 className="text-lg font-bold text-gray-700 mb-4">
+              Konfirmasi Logout
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Apakah Anda yakin ingin logout?
+            </p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setShowLogoutConfirm(false)} // Membatalkan logout

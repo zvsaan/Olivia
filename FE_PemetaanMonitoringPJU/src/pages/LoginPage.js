@@ -30,7 +30,7 @@ const LoginPage = () => {
           navigate('/v1/visitor/home');
           break;
         case 'dishub':
-          navigate('/v1/dishub/dashboard');
+          navigate('/app/dishub/dashboard');
           break;
         default:
           setError('Invalid role. Please contact support.');
